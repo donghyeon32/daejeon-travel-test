@@ -749,10 +749,10 @@ body.locked{overflow:hidden}
   background:linear-gradient(90deg,transparent,rgba(201,162,74,.75),transparent);
 }
 /* 선택지를 타로 카드처럼 */
-.ocards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-content:center;justify-items:stretch;width:100%}
+.ocards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-content:center;align-items:stretch;justify-items:stretch;width:100%}
 .ocard{
   position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  width:100%;min-width:0;min-height:300px;
+  width:100%;min-width:0;height:300px;overflow:hidden;  /* 4장 높이가 절대 서로 달라지지 않도록 고정값+잘라내기 */
   gap:10px;padding:24px 5px 24px;border:2px solid #C9A24A;border-radius:13px;
   background:
     radial-gradient(80% 50% at 50% 4%,rgba(201,162,74,.13),transparent 64%),
@@ -784,7 +784,7 @@ body.locked{overflow:hidden}
 @media(min-width:640px){
   .reading{padding:22px;min-height:560px}
   .ocards{grid-template-columns:repeat(4,1fr);gap:14px}
-  .ocard{width:100%;max-width:232px;aspect-ratio:2/3;min-height:0;max-height:min(46vh,360px);padding:24px 10px 28px;gap:8px}
+  .ocard{width:100%;max-width:232px;aspect-ratio:2/3;height:auto;overflow:hidden;max-height:min(46vh,360px);padding:24px 10px 28px;gap:8px}
   .ocard em{font-size:2.1rem}
   .ocard b{font-size:.78rem;line-height:1.3;white-space:nowrap;word-break:keep-all;overflow:hidden;text-overflow:ellipsis;max-width:100%}
   .ocard span{font-size:.72rem;line-height:1.45}
@@ -1478,7 +1478,7 @@ function roundRect(x,l,t,w,h,r){
       {e:'◈',t:'만 원 정도면 괜찮아요',s:'시티투어 정기코스 하루 요금',v:''},
       {e:'❂',t:'좋으면 더 써도 돼요',s:'체험이 들어간 코스',v:''},
       {e:'∞',t:'생각 안 해봤어요',s:'어느 쪽이든 좋아요',v:''}]},
-    {q:'돌아가서 무엇을 이야기하고 싶나요?', k:'th', o:[
+    {q:'이번 여행에서 가장 기대되는 건?', k:'th', o:[
       {e:'✧',t:'반짝이는 야경 사진',s:'다리, 전망대, 물빛 야경',v:'night'},
       {e:'❋',t:'전시나 미술관 관람',s:'그림, 오래된 건축, 갤러리',v:'art'},
       {e:'⌂',t:'옛 골목 산책',s:'마을과 그곳 사람들의 이야기',v:'village'},
