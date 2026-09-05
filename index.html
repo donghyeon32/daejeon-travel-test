@@ -320,6 +320,8 @@ input,select,textarea{font-size:16px}
 .peek a{position:absolute;inset:0;display:block}
 .peek img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .peek img.blur{object-fit:cover;filter:blur(18px) brightness(.6);transform:scale(1.12)}
+.peek img.ph{opacity:0;transition:opacity .35s ease}
+.peek img.ph.on{opacity:1}
 .peek__cap{font-size:.82rem;font-weight:700;margin:9px 0 0;line-height:1.45}
 .peek__nav{display:flex;align-items:center;justify-content:space-between;margin-top:9px}
 .peek__nav button{
@@ -347,7 +349,9 @@ input,select,textarea{font-size:16px}
   .rail,.rail--a{overflow:visible}
   .center{grid-column:2;grid-row:1/5}
   .rail--r{grid-column:3;grid-row:1/5}
-  .rail{overflow:hidden}   /* 왼쪽·오른쪽 칸은 스크롤하지 않습니다 */
+  .rail{overflow-y:auto;overflow-x:hidden}   /* 왼쪽·오른쪽 칸은 내용이 넘치면 그 칸만 따로 스크롤합니다(잘리지 않게) */
+  .rail::-webkit-scrollbar{width:7px}
+  .rail::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:9px}
   .center{grid-template-rows:minmax(0,1fr);height:100%}
   .screen{overflow:auto;height:100%;align-self:stretch;display:flex;flex-direction:column}
   #v-quiz{width:100%;flex:1;display:flex}          /* 질문을 칸 한가운데에 놓습니다 */
@@ -748,8 +752,8 @@ body.locked{overflow:hidden}
 .ocards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-content:center;justify-items:stretch;width:100%}
 .ocard{
   position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  width:100%;min-width:0;min-height:232px;
-  gap:8px;padding:20px 5px 22px;border:2px solid #C9A24A;border-radius:13px;
+  width:100%;min-width:0;min-height:300px;
+  gap:10px;padding:24px 5px 24px;border:2px solid #C9A24A;border-radius:13px;
   background:
     radial-gradient(80% 50% at 50% 4%,rgba(201,162,74,.13),transparent 64%),
     linear-gradient(170deg,#FBF6EA,#EFE3CC 62%,#E7D9BE);
@@ -767,11 +771,11 @@ body.locked{overflow:hidden}
 .ocard:hover{transform:translateY(-7px) rotate(-.7deg);box-shadow:0 12px 22px rgba(16,20,30,.4), inset 0 0 0 1px rgba(201,162,74,.45)}
 .ocard:active{transform:translateY(-1px)}
 .ocard em{
-  font-style:normal;font-size:1.6rem;line-height:1;color:#A9843A;
+  font-style:normal;font-size:2.1rem;line-height:1;color:#A9843A;
   text-shadow:0 1px 0 rgba(255,255,255,.7);
 }
-.ocard b{font-family:var(--f-d);font-weight:700;font-size:.74rem;line-height:1.26;letter-spacing:-.01em;margin-top:4px;padding:0 2px;word-break:break-all;overflow-wrap:anywhere}
-.ocard span{font-size:.75rem;color:#6E5E40;line-height:1.5;max-width:15ch}
+.ocard b{font-family:var(--f-d);font-weight:700;font-size:.8rem;line-height:1.28;letter-spacing:-.01em;margin-top:6px;padding:0 2px;word-break:break-all;overflow-wrap:anywhere}
+.ocard span{display:block;font-size:.56rem;color:#8a7a58;line-height:1.32;margin-top:2px;max-width:100%;word-break:keep-all}
 .ocard i{                             /* 카드 번호 */
   position:absolute;top:9px;left:0;right:0;font-style:normal;
   font-size:.56rem;letter-spacing:.2em;color:rgba(201,162,74,.9);
@@ -780,9 +784,10 @@ body.locked{overflow:hidden}
 @media(min-width:640px){
   .reading{padding:22px;min-height:560px}
   .ocards{grid-template-columns:repeat(4,1fr);gap:14px}
-  .ocard{width:100%;max-width:232px;aspect-ratio:2/3;min-height:0;max-height:min(46vh,360px);padding:26px 16px 30px;gap:9px}
-  .ocard em{font-size:2.5rem}
-  .ocard b{font-size:1.2rem;line-height:1.38}
+  .ocard{width:100%;max-width:232px;aspect-ratio:2/3;min-height:0;max-height:min(46vh,360px);padding:24px 10px 28px;gap:8px}
+  .ocard em{font-size:2.1rem}
+  .ocard b{font-size:.78rem;line-height:1.3;white-space:nowrap;word-break:keep-all;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .ocard span{font-size:.72rem;line-height:1.45}
   .ocard i{font-size:.62rem;top:9px}
   .ocard::before{inset:7px;border-radius:9px}
   .ocard::after{font-size:.62rem;bottom:8px}
@@ -1474,10 +1479,10 @@ function roundRect(x,l,t,w,h,r){
       {e:'❂',t:'좋으면 더 써도 돼요',s:'체험이 들어간 코스',v:''},
       {e:'∞',t:'생각 안 해봤어요',s:'어느 쪽이든 좋아요',v:''}]},
     {q:'돌아가서 무엇을 이야기하고 싶나요?', k:'th', o:[
-      {e:'✧',t:'사진 한 장',s:'야경, 별, 물빛이 남는 곳',v:'night'},
-      {e:'❋',t:'처음 본 작품',s:'전시, 미술관, 오래된 건축',v:'art'},
-      {e:'⌂',t:'골목에서 만난 사람',s:'마을과 그곳 사람들의 이야기',v:'village'},
-      {e:'❧',t:'푹 쉬었다는 기분',s:'숲과 물가에서 보내는 시간',v:'nature'}]}
+      {e:'✧',t:'반짝이는 야경 사진',s:'다리, 전망대, 물빛 야경',v:'night'},
+      {e:'❋',t:'전시나 미술관 관람',s:'그림, 오래된 건축, 갤러리',v:'art'},
+      {e:'⌂',t:'옛 골목 산책',s:'마을과 그곳 사람들의 이야기',v:'village'},
+      {e:'❧',t:'숲·호수에서 휴식',s:'맨발로 걷고 멍때리는 시간',v:'nature'}]}
   ];
   var step=0, ans=[], current=null;
 
@@ -1491,7 +1496,7 @@ function roundRect(x,l,t,w,h,r){
       Q.o.map(function(o,i){
         var R=['Ⅰ','Ⅱ','Ⅲ','Ⅳ'][i]||'';
         return '<button class="ocard" data-i="'+i+'"><i>'+R+'</i><em>'+o.e+'</em>'+
-               '<b>'+o.t+'</b></button>';
+               '<b>'+o.t+'</b><span>'+o.s+'</span></button>';
       }).join('')+'</div>';
     body.querySelectorAll('.ocard').forEach(function(b){
       b.addEventListener('click',function(){
@@ -1671,8 +1676,11 @@ function djInitPeek(){
   function draw(){
     var s=LIST[i];
     box.innerHTML='<a href="'+s.href+'" target="_blank" rel="noopener">'+
-      '<img class="blur" src="'+s.src+'" alt="" aria-hidden="true">'+
-      '<img src="'+s.src+'" alt="'+s.n+'"></a>';
+      '<img class="blur" src="'+s.src+'" alt="" aria-hidden="true" decoding="async">'+
+      '<img class="ph" src="'+s.src+'" alt="'+s.n+'" decoding="async"></a>';
+    /* 사진이 아직 디코딩 중이어도 검은 칸으로 멈춰 보이지 않게, 준비되면 부드럽게 나타납니다 */
+    var im=box.querySelector('img.ph');
+    if(im.complete){ im.classList.add('on') } else { im.onload=function(){ im.classList.add('on') } }
     cap.textContent=s.d+' · '+s.n;
     nEl.textContent=(i+1)+' / '+LIST.length;
   }
