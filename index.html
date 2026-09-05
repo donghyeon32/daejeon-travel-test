@@ -365,6 +365,7 @@ input,select,textarea{font-size:16px}
 .intro{
   position:fixed;inset:0;z-index:200;background:#07090D;overflow:hidden;
   display:flex;align-items:center;justify-content:center;text-align:center;
+  height:100vh;height:100dvh; /* 모바일 사파리 주소창 때문에 화면 아래가 잘리는 것을 막습니다 */
 }
 .intro[hidden]{display:none}
 .intro.fade{opacity:0;transition:opacity .9s ease;pointer-events:none}
@@ -438,6 +439,7 @@ input,select,textarea{font-size:16px}
    좁은 화면에서는 빛줄기를 돌리지 않고 고정해 둡니다 */
 @media(max-width:600px){
   .vtx.on .vtx__ray{animation:none}
+  .vtx__dol-card::before{animation:none}   /* 원뿔형 그러데이션 회전은 휴대폰에서 버벅여서 좁은 화면엔 고정 */
 }
 .vtx__star{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);
@@ -465,19 +467,40 @@ input,select,textarea{font-size:16px}
 }
 /* 오른쪽 눈 위치(원본 사진 기준 약 60%,42%)에 살짝 기울여 얹은 카드 */
 /* 반투명 유리 같은 카드 — 눈을 완전히 가리지 않고 비쳐 보입니다 */
+/* 반투명 카드 — 눈동자와 카드 무늬가 한 점에서 겹치며, 카드 안쪽에서
+   빛이 뻗어나가듯 은은하게 빛납니다 */
 .vtx__dol-card{
   position:absolute;left:60.2%;top:45.6%;width:19%;aspect-ratio:2/3;
   transform:translate(-50%,-50%) rotate(-14deg);
-  border-radius:4px;border:1.5px solid rgba(201,162,74,.85);
+  border-radius:4px;border:1.5px solid rgba(201,162,74,.8);
   background:
-    radial-gradient(60% 45% at 50% 22%,rgba(255,214,120,.22),transparent 70%),
-    linear-gradient(165deg,rgba(42,53,80,.4),rgba(22,28,42,.45));
-  backdrop-filter:blur(1.5px) brightness(1.1);
-  -webkit-backdrop-filter:blur(1.5px) brightness(1.1);
-  box-shadow:0 4px 10px rgba(0,0,0,.3), inset 0 0 0 1px rgba(255,214,120,.22);
-  display:flex;align-items:center;justify-content:center;
-  color:#F0C766;font-size:.62rem;line-height:1;
-  text-shadow:0 0 8px rgba(240,199,102,.9);
+    radial-gradient(58% 55% at 50% 50%,rgba(255,244,214,.55),rgba(240,199,102,.14) 55%,transparent 76%),
+    linear-gradient(165deg,rgba(42,53,80,.32),rgba(22,28,42,.4));
+  backdrop-filter:blur(1.2px) brightness(1.15);
+  -webkit-backdrop-filter:blur(1.2px) brightness(1.15);
+  box-shadow:0 4px 10px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,214,120,.22);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+  color:#FFF6E0;font-size:1.05rem;line-height:1;
+  text-shadow:0 0 3px #fff, 0 0 10px rgba(255,244,214,.95), 0 0 22px rgba(240,199,102,.9);
+}
+/* 카드 속에서 눈동자를 중심으로 뻗어나가는 빛줄기 */
+.vtx__dol-card::before{
+  content:"";position:absolute;inset:-40%;
+  background:repeating-conic-gradient(from 0deg,rgba(255,244,214,.5) 0deg 2deg,transparent 2deg 18deg);
+  -webkit-mask:radial-gradient(circle,#000 0%,#000 20%,transparent 55%);
+          mask:radial-gradient(circle,#000 0%,#000 20%,transparent 55%);
+  mix-blend-mode:screen;animation:vspin 9s linear infinite;
+}
+/* 카드를 손에 쥐고 있는 것처럼, 살짝씩 떨리며 흔들립니다 */
+@keyframes dolHold{
+  0%,100%{transform:translate(-50%,-50%) rotate(-14deg)}
+  30%{transform:translate(-50%,-52%) rotate(-10deg)}
+  60%{transform:translate(-51%,-49%) rotate(-17deg)}
+  80%{transform:translate(-49%,-50%) rotate(-13deg)}
+}
+.vtx__dol.on .vtx__dol-card{animation:dolHold 3.4s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){
+  .vtx__dol.on .vtx__dol-card{animation:none}
 }
 /* 문양과 함께 빨려 들어갑니다 */
 .vtx.suck{opacity:0;transform:translate(-50%,-50%) scale(.3);transition:opacity .8s ease,transform 1s cubic-bezier(.6,0,.9,.2)}
@@ -623,6 +646,7 @@ body.locked{overflow:hidden}
 /* ═══════ 결과지 ═══════ */
 .sheet{
   position:fixed;inset:0;z-index:150;display:flex;align-items:center;justify-content:center;
+  height:100vh;height:100dvh;
   padding:calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right))
           calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
 }
