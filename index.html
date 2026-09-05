@@ -1162,6 +1162,28 @@ summary:focus-visible{
   /* 흔들림이 멈추면 마스코트가 어정쩡한 위치에 굳지 않도록 제자리로 */
   .me__dol{transform:none}
 }
+
+/* 카드를 다시 뽑는 버튼.
+   카드가 주인공인 화면이라 흰 버튼은 너무 튑니다.
+   테두리만 있는 차분한 모양으로 두되, 누를 수 있다는 건 분명히 보이게 합니다. */
+.tar__again{display:flex;justify-content:center;margin-top:4px}
+.tar__again-b{
+  font:inherit;font-size:.85rem;font-weight:700;
+  color:rgba(240,231,208,.78);
+  background:rgba(255,255,255,.05);
+  border:1.5px solid rgba(201,162,74,.45);
+  border-radius:999px;
+  padding:10px 20px;min-height:44px;   /* 손가락으로 누르기 좋은 최소 크기 */
+  cursor:pointer;
+  transition:background .18s ease,color .18s ease,border-color .18s ease;
+}
+.tar__again-b:hover{
+  background:rgba(201,162,74,.14);
+  border-color:rgba(201,162,74,.75);
+  color:#F6EBD2;
+}
+.tar__again-b:active{transform:translateY(1px)}
+
 </style>
 </head>
 <body>
@@ -1712,7 +1734,15 @@ function roundRect(x,l,t,w,h,r){
       {e:'⌂',t:'옛 골목 산책',s:'마을과 그곳 사람들의 이야기',v:'village'},
       {e:'❧',t:'숲·호수에서 휴식',s:'맨발로 걷고 멍때리는 시간',v:'nature'}]}
   ];
-  var step=0, ans=[], current=null;
+  var step=0, ans=[], current=null, finished=false;
+
+  /* 처음으로 되돌립니다. 화면 전환과 '다시 뽑기' 버튼이 함께 씁니다. */
+  function restart(){
+    step=0; ans=[]; current=null; finished=false;
+    ask();
+  }
+  window.djRestartQuiz = restart;
+  window.djQuizFinished = function(){ return finished };
 
   function draw(){
     dots.innerHTML=QS.map(function(_,i){return '<i class="qdot'+(i<=step?' on':'')+'"></i>'}).join('');
@@ -1759,19 +1789,24 @@ function roundRect(x,l,t,w,h,r){
 
   /* 카드 세 장을 엎어 놓고 하나를 고르게 합니다 */
   function show(){
+    finished=true;
     var cards=pool();
     dots.innerHTML=QS.map(function(){return '<i class="qdot on"></i>'}).join('');
     stepEl.textContent='카드'; back.hidden=true;
     body.innerHTML=
       '<p class="ask">마음이 가는 카드를 한 장 고르세요</p>'+
-      '<div class="tar">'+cards.map(function(c,i){
+      '<div class="tar" id="tarRow">'+cards.map(function(c,i){
         var ph=photoFor(c); c._ph=ph;
         return '<button class="tcard" data-i="'+i+'"><span class="tin">'+
           '<span class="tface tback"><span class="tback__m">✦<small>DAEJEON</small></span></span>'+
           '<span class="tface tfront"><img src="'+ph.src+'" alt=""></span>'+
         '</span></button>';
       }).join('')+'</div>'+
-      '';
+      '<div class="tar__again">'+
+        '<button class="tar__again-b" id="qAgain">처음부터 다시 뽑기</button>'+
+      '</div>';
+
+    document.getElementById('qAgain').onclick=restart;
 
     body.querySelectorAll('.tcard').forEach(function(b){
       b.addEventListener('click',function(){
@@ -1834,7 +1869,7 @@ function roundRect(x,l,t,w,h,r){
 
     document.getElementById('rSave').onclick=function(){ saveCard(c, ph, fit) };
     document.getElementById('rGo').onclick=function(){ close(); showCourse(c.t) };
-    document.getElementById('rAgain').onclick=function(){ close(); step=0; ans=[]; ask() };
+    document.getElementById('rAgain').onclick=function(){ close(); restart() };
     document.getElementById('rShare').onclick=function(){ shareCourse(c.t, c.s) };
     body.querySelectorAll('.more__i').forEach(function(b){
       b.onclick=function(){ close(); showCourse(b.dataset.t) };
@@ -1909,12 +1944,38 @@ window.djInitPeek=djInitPeek;
 
 /* ══════════ 화면 전환 ══════════ */
 function djTab(v){
+  /* 카드를 다 뽑고 나갔다가 돌아오면 처음부터 다시 고를 수 있게 합니다.
+     아직 질문에 답하는 중이라면 진행 상황은 그대로 둡니다 —
+     잠깐 다른 화면을 봤다고 답한 걸 날리면 곤란하니까요. */
+  if(v==='v-quiz' && window.djQuizFinished && window.djQuizFinished()){
+    if(window.djRestartQuiz) window.djRestartQuiz();
+  }
   ['v-quiz','v-list','v-course'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.hidden = id!==v;
   });
   var sc=document.querySelector('.screen'); if(sc) sc.scrollTop=0;
 }
 window.djTab=djTab;
+
+/* 앱을 처음 연 상태로 되돌립니다. '처음부터 다시 보기'가 씁니다. */
+window.djResetAll=function(){
+  /* 열려 있는 결과 시트가 있으면 닫습니다 */
+  var sh=document.getElementById('sheet');
+  if(sh && !sh.hidden){
+    var x=document.getElementById('sheetX');
+    if(x) x.click(); else sh.hidden=true;
+  }
+  document.body.classList.remove('locked');
+  /* 카드 선택을 첫 질문으로 */
+  if(window.djRestartQuiz) window.djRestartQuiz();
+  /* 첫 화면으로 */
+  ['v-list','v-course'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.hidden=true;
+  });
+  var q=document.getElementById('v-quiz'); if(q) q.hidden=false;
+  var sc=document.querySelector('.screen'); if(sc) sc.scrollTop=0;
+  window.scrollTo(0,0);
+};
 document.getElementById('toQuiz').onclick=function(){ djTab('v-quiz') };
 document.getElementById('quickList').onclick=function(){ djTab('v-list') };
 (function(){
@@ -2185,7 +2246,14 @@ function openCourse(title){
   }
 
   document.getElementById('iSkip').onclick=done;
-  document.getElementById('replay').onclick=start;
+  /* '처음부터 다시 보기'는 말 그대로 처음입니다.
+   시네마틱만 다시 틀면 막이 걷힌 뒤 아까 뽑아둔 카드 화면이 그대로 남아
+   '다시 보기'가 아니라 '영상만 다시 보기'가 됩니다.
+   그래서 첫 화면으로 돌려놓고 시작합니다. */
+document.getElementById('replay').onclick=function(){
+  if(window.djResetAll) window.djResetAll();
+  start();
+};
   window.djIntro=start;                      /* 언제든 다시 부를 수 있게 */
 
   /* 탭을 새로 열 때마다 한 번씩. 브라우저를 닫으면 초기화됩니다.
